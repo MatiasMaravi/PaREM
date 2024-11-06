@@ -20,7 +20,7 @@ TransitionTable Tt = {
     {1, 0, 0, 0, 8},
     {1, 0, 0, 0, 0}
 };
-string T = "parallel";
+string T = "parallelappapaparalleljfbaofhawihwoiaa";
 FinalStates F = {8};
 int q0 = 0;
 States Q = {0, 1, 2, 3, 4, 5, 6, 7, 8};
