@@ -1,4 +1,5 @@
 #include "base.h"
+#define NUM_STATES 9
 TransitionTable Tt = {
     {1, 0, 0, 0, 0},
     {1, 2, 0, 0, 0},
@@ -10,10 +11,9 @@ TransitionTable Tt = {
     {1, 0, 0, 0, 8},
     {1, 0, 0, 0, 0}
 };
-string T = "parallel";
+
 States F = {8}; // Final states
 int q0 = 0;
-States Q = {0, 1, 2, 3, 4, 5, 6, 7, 8};
 unordered_map <char, int> sigma = {
     {'p', 0},
     {'a', 1},

@@ -1,9 +1,24 @@
-trivial_reduction_mpi:
-	mpic++ -o trivial_reduction_mpi
-	 trivial_reduction_mpi.cpp && mpirun -np 4 trivial_reduction_mpi
-	 && rm trivial_reduction_mpi
+# Variables
+GXX = mpic++
+CFLAGS = -Iheaders
+TARGETS = trivial_reduction_mpi binary_reduction_mpi
+P = 4
 
-binary_reduction_mpi:
-	mpic++ -o binary_reduction_mpi
-	 binary_reduction_mpi.cpp && mpirun -np 4 binary_reduction_mpi
-	  && rm binary_reduction_mpi
+# Regla principal (compila todo)
+all: $(TARGETS)
+
+# Reglas para cada ejecutable
+%: %.cpp
+	$(GXX) $(CFLAGS) -o $@.out $<
+
+# Regla para ejecutar trivial_reduction_mpi
+run-trivial: trivial_reduction_mpi
+	mpirun -np $(P) trivial_reduction_mpi.out
+
+# Regla para ejecutar binary_reduction_mpi
+run-binary: binary_reduction_mpi
+	mpirun -np $(P) binary_reduction_mpi.out
+
+# Limpieza de archivos generados
+clean:
+	rm -f *.out
