@@ -64,7 +64,7 @@ string T =
     "el medio ambiente puede traer prosperidad.";
 
 
-void reduction_op(void *invec, void *inoutvec, int *len, MPI_Datatype *datatype) {
+void reduction_op(void *invec, void *inoutvec) {
     int *in = static_cast<int*>(invec);
     int *inout = static_cast<int*>(inoutvec);
     
@@ -130,7 +130,7 @@ int main(int argc, char **argv) {
             // Procesos 0 y 1: enviar y recibir entre sí
             if (mpi_rank == 0) {
                 MPI_Recv(intermediate_matrix, N * M, MPI_INT, 1, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-                reduction_op(matrix, intermediate_matrix, nullptr, nullptr);
+                reduction_op(matrix, intermediate_matrix);
 
             } else {
                 MPI_Send(&matrix[0][0], N * M, MPI_INT, 0, 0, MPI_COMM_WORLD);
@@ -139,7 +139,7 @@ int main(int argc, char **argv) {
             // Procesos 2 y 3: enviar y recibir entre sí
             if (mpi_rank == 2) {
                 MPI_Recv(intermediate_matrix, N * M, MPI_INT, 3, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-                reduction_op(matrix,intermediate_matrix, nullptr, nullptr);
+                reduction_op(matrix,intermediate_matrix);
 
             } else {
                 MPI_Send(&matrix[0][0], N * M, MPI_INT, 2, 0, MPI_COMM_WORLD);
@@ -149,7 +149,7 @@ int main(int argc, char **argv) {
         // Reducir los resultados de los pares de procesos
         if (mpi_rank == 0) {
             MPI_Recv(&final_matrix, N * M, MPI_INT, 2, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-            reduction_op(&intermediate_matrix, &final_matrix, nullptr, nullptr);
+            reduction_op(&intermediate_matrix, &final_matrix);
             cout << "Cantidad de matcheos: " << final_matrix[1][q0] << endl; 
             double end_time = MPI_Wtime();
             cout << "Tiempo transcurrido: " << (end_time - start_time) << " segundos" << std::endl;
@@ -164,7 +164,7 @@ int main(int argc, char **argv) {
             // Procesos 0 y 1: enviar y recibir entre sí
             if (mpi_rank == 0) {
                 MPI_Recv(intermediate_matrix, N * M, MPI_INT, 1, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-                reduction_op(matrix, intermediate_matrix, nullptr, nullptr);
+                reduction_op(matrix, intermediate_matrix);
 
             } else {
                 MPI_Send(&matrix[0][0], N * M, MPI_INT, 0, 0, MPI_COMM_WORLD);
@@ -173,7 +173,7 @@ int main(int argc, char **argv) {
             // Procesos 2 y 3: enviar y recibir entre sí
             if (mpi_rank == 2) {
                 MPI_Recv(intermediate_matrix, N * M, MPI_INT, 3, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-                reduction_op(matrix,intermediate_matrix, nullptr, nullptr);
+                reduction_op(matrix,intermediate_matrix);
 
             } else {
                 MPI_Send(&matrix[0][0], N * M, MPI_INT, 2, 0, MPI_COMM_WORLD);
@@ -182,7 +182,7 @@ int main(int argc, char **argv) {
             // Procesos 4 y 5: enviar y recibir entre sí
             if (mpi_rank == 4) {
                 MPI_Recv(intermediate_matrix, N * M, MPI_INT, 5, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-                reduction_op(matrix, intermediate_matrix, nullptr, nullptr);
+                reduction_op(matrix, intermediate_matrix);
 
             } else {
                 MPI_Send(&matrix[0][0], N * M, MPI_INT, 4, 0, MPI_COMM_WORLD);
@@ -191,7 +191,7 @@ int main(int argc, char **argv) {
             // Procesos 6 y 7: enviar y recibir entre sí
             if (mpi_rank == 6) {
                 MPI_Recv(intermediate_matrix, N * M, MPI_INT, 7, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-                reduction_op(matrix, intermediate_matrix, nullptr, nullptr);
+                reduction_op(matrix, intermediate_matrix);
 
             } else {
                 MPI_Send(&matrix[0][0], N * M, MPI_INT, 6, 0, MPI_COMM_WORLD);
@@ -203,7 +203,7 @@ int main(int argc, char **argv) {
             // Procesos 0 y 2: enviar y recibir entre sí
             if (mpi_rank == 0) {
                 MPI_Recv(final_matrix, N * M, MPI_INT, 2, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-                reduction_op(intermediate_matrix, final_matrix, nullptr, nullptr);
+                reduction_op(intermediate_matrix, final_matrix);
             } else {
                 MPI_Send(&intermediate_matrix[0][0], N * M, MPI_INT, 0, 0, MPI_COMM_WORLD);
             }
@@ -211,7 +211,7 @@ int main(int argc, char **argv) {
             // Procesos 4 y 6: enviar y recibir entre sí
             if (mpi_rank == 4) {
                 MPI_Recv(final_matrix, N * M, MPI_INT, 6, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-                reduction_op(intermediate_matrix, final_matrix, nullptr, nullptr);
+                reduction_op(intermediate_matrix, final_matrix);
             } else {
                 MPI_Send(&intermediate_matrix[0][0], N * M, MPI_INT, 4, 0, MPI_COMM_WORLD);
             }
@@ -221,7 +221,7 @@ int main(int argc, char **argv) {
         if (mpi_rank == 0) {
             // Procesos 0 y 4: enviar y recibir entre sí
             MPI_Recv(&final_matrix, N * M, MPI_INT, 4, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-            reduction_op(&final_matrix, &final_matrix, nullptr, nullptr);
+            reduction_op(&final_matrix, &final_matrix);
             cout << "Cantidad de matcheos: " << final_matrix[1][q0] << endl;
             double end_time = MPI_Wtime();
             cout << "Tiempo transcurrido: " << (end_time - start_time) << " segundos" << std::endl; 
