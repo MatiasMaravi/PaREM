@@ -30,6 +30,7 @@ string get_text(string filename){
 }
 string T = get_text("../textos/banana_800k.txt");
 int main(int argc, char **argv) {
+    //cout << T << endl;
     int mpi_rank, mpi_size;
     int n = T.size();
     MPI_Status stat;
