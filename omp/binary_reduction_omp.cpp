@@ -3,7 +3,7 @@
 #include <cmath>
 #include <omp.h>
 #include <fstream>
-#define NUM_THREADS 4
+#define NUM_THREADS 16
 using namespace std;
 
 //Read txt file
@@ -18,18 +18,17 @@ string get_text(string filename){
         file.close();
     }
     //Si no es multiplo de 4, agregar padding
-    if(text.size() % 4 != 0){
-        int padding = 4 - (text.size() % 4);
+    if(text.size() % NUM_THREADS != 0){
+        int padding = NUM_THREADS - (text.size() % NUM_THREADS);
         for (int i = 0; i < padding; i++){
-            text += " ";
+            text += "a";
         }
     }
     cout << "Size of text: " << text.size() << endl;
     return text;
 }
-string T = get_text("../textos/banana_200k.txt");
-int main(int argc, char **argv) {
-    
+
+double run_parallel(const string& T){
     int n = T.size();
     omp_set_num_threads(NUM_THREADS);
     vector<vector<int>> L(NUM_THREADS,vector<int>(NUM_STATES));
@@ -45,28 +44,36 @@ int main(int argc, char **argv) {
             L[rank][k] = k;
         }
         while (j <= end_position) {
-            for (int k = 0; k < NUM_STATES; k++) {
-                L[rank][k] = Tt[L[rank][k]][sigma[T[j]]];
-                if (F.find(L[rank][k]) != F.end()) {
-                    R[rank][k]++;
-                }
+            L[rank][q0] = Tt[L[rank][q0]][sigma[T[j]]];
+            if (F.find(L[rank][q0]) != F.end()) {
+                R[rank][q0]++;
             }
             j++;
         }
         #pragma omp barrier
         for(int m = 1; m <= ceil(log2(size));m++){
             if(rank % (int)pow(2,m) == 0 && (rank + (int)pow(2,m-1)) < size){
-                for(int x = 0; x < NUM_STATES; x++){
-                    R[rank][x] += R[rank + (int)pow(2,m-1)][L[rank][x]];
-                    L[rank][x] = L[rank + (int)pow(2,m-1)][L[rank][x]];
-                }
+                
+                R[rank][q0] += R[rank + (int)pow(2,m-1)][L[rank][q0]];
+                L[rank][q0] = L[rank + (int)pow(2,m-1)][L[rank][q0]];
+            
             }
         }
     }
     double end_time = omp_get_wtime();
-    cout << "Tiempo transcurrido: " << (end_time - start_time)*1e6 << " microsegundos" << std::endl;
     cout << "Cantidad de veces que la cadena es aceptada: " << R[0][q0] << endl;
-    
+    return (end_time - start_time)*1e6;
+}
+
+int main(int argc, char **argv) {
+
+    string T = get_text("../textos/banana_200k.txt");
+    double count = 0;
+    for (int i = 0;  i < 10; i++) {
+        count += run_parallel(T);
+    }
+    count/=10;
+    cout << "Time: " << count << " microseconds" << endl;
 
     return 0;
 }

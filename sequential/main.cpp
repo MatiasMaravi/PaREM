@@ -19,19 +19,17 @@ string get_text(string filename){
         file.close();
     }
     //Si no es multiplo de 4, agregar padding
-    if(text.size() % 4 != 0){
-        int padding = 4 - (text.size() % 4);
-        for (int i = 0; i < padding; i++){
-            text += " ";
-        }
-    }
+    // if(text.size() % 4 != 0){
+    //     int padding = 4 - (text.size() % 4);
+    //     for (int i = 0; i < padding; i++){
+    //         text += " ";
+    //     }
+    // }
     cout << "Size of text: " << text.size() << endl;
     return text;
 }
 
-
-int main(){
-    string T = get_text("../textos/banana_200k.txt");
+int64_t run_afd(const string& T){
     int contador = 0;
     int j = 0;
     int q = q0;
@@ -46,6 +44,16 @@ int main(){
         j++;
     }
     auto end = std::chrono::high_resolution_clock::now();
-    cout << "Time: " << std::chrono::duration_cast<std::chrono::microseconds>(end - start).count() << "ms" << endl;
-    cout << "Cantidad de matcheos: " << contador << endl;
+    auto time = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
+    return time;
+}
+
+int main(){
+    string T = get_text("../textos/banana_200k.txt");
+    double count = 0;
+    for (int i = 0;  i < 10; i++) {
+        count += run_afd(T);
+    }
+    count/=10;
+    cout << "Time: " << count << " microseconds" << endl;
 }

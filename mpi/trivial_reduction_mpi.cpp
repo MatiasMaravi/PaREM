@@ -28,7 +28,7 @@ string get_text(string filename){
     }
     return text;
 }
-string T = get_text("../textos/banana_200k.txt");
+string T = get_text("../textos/banana_800k.txt");
 int main(int argc, char **argv) {
     int mpi_rank, mpi_size;
     int n = T.size();
@@ -37,8 +37,6 @@ int main(int argc, char **argv) {
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank); 
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
 
-    double start_time = MPI_Wtime();
-
     int j = mpi_rank * (n / mpi_size);
     int end_position = (mpi_rank + 1) * (n / mpi_size) - 1;
     vector<int> L(NUM_STATES);
@@ -46,7 +44,7 @@ int main(int argc, char **argv) {
     for (int k = 0; k < NUM_STATES; k++) {
         L[k] = k;
     }
-
+    double start_time = MPI_Wtime();
     while (j <= end_position) {
         for (int i = 0; i < NUM_STATES; i++) {
             
@@ -60,6 +58,8 @@ int main(int argc, char **argv) {
     }
 
     MPI_Barrier(MPI_COMM_WORLD);
+    double barrier_time = MPI_Wtime();
+    double Compute_time = barrier_time - start_time;
     int R_temp, L_temp;
 
     if (mpi_rank == 0) {
@@ -89,6 +89,8 @@ int main(int argc, char **argv) {
         cout << "Cantidad de veces que la cadena es aceptada: " << R_temp << endl;
         double end_time = MPI_Wtime();
         cout << "Tiempo transcurrido: " << (end_time - start_time)*1e6 << " microsegundos" << std::endl;
+        cout << "Tiempo de computo: " << (Compute_time)*1e6 << " microsegundos" << std::endl;
+        cout << "Tiempo de comunicacion: " << (end_time - Compute_time - start_time)*1e6 << " microsegundos" << std::endl;
     }
 
     
