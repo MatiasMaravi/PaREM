@@ -5,7 +5,7 @@
 using std::cout;
 using std::endl;
 using std::ifstream;
-
+using std::ofstream;
 
 //Read txt file
 string get_text(string filename){
@@ -49,11 +49,19 @@ int64_t run_afd(const string& T){
 }
 
 int main(){
-    string T = get_text("../textos/banana_200k.txt");
-    double count = 0;
-    for (int i = 0;  i < 10; i++) {
-        count += run_afd(T);
+    vector<string> textos = {"10k","100k","1M","2M"};
+    string output_file = "results_sequential.txt";
+    ofstream output(output_file);
+    for(string texto : textos){
+    
+        output << "N: " << texto << endl;
+        string T = get_text("../textos/banana_" + texto + ".txt");
+        double count = 0;
+        for (int i = 0;  i < 10; i++) {
+            count += run_afd(T);
+        }
+        count/=10;
+        output << "Average time: " << count << " microseconds" << endl;
+    
     }
-    count/=10;
-    cout << "Time: " << count << " microseconds" << endl;
 }

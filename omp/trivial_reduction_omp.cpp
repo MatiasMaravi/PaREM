@@ -2,10 +2,10 @@
 #include "../automatas/banana_word.h"
 #include <omp.h>
 #include <fstream>
-#define NUM_THREADS 16
+
 using namespace std;
 //Read txt file
-string get_text(string filename){
+string get_text(string filename, int NUM_THREADS){
     string text;
     ifstream file(filename);
     if (file.is_open()){
@@ -15,7 +15,7 @@ string get_text(string filename){
         }
         file.close();
     }
-    //Si no es multiplo de 4, agregar padding
+    //Si no es multiplo, no funciona bien
     if(text.size() % NUM_THREADS != 0){
         int padding = NUM_THREADS - (text.size() % NUM_THREADS);
         for (int i = 0; i < padding; i++){
@@ -25,9 +25,8 @@ string get_text(string filename){
     cout << "Size of text: " << text.size() << endl;
     return text;
 }
-string T = get_text("../textos/banana_200k.txt");
 
-double run_parallel(const string& T){
+double run_parallel(const string& T, int NUM_THREADS){
     int n = T.size();
     omp_set_num_threads(NUM_THREADS);
     vector<vector<int>> L(NUM_THREADS,vector<int>(NUM_STATES));
@@ -68,13 +67,22 @@ double run_parallel(const string& T){
 }
 
 int main(int argc, char **argv) {
-    double count = 0;
-    for (int i = 0;  i < 10; i++) {
-        count += run_parallel(T);
+    vector<string> textos = {"10k","100k","1M","2M"};
+    vector<int> p = {2,4,8,16};
+    string output_file = "results_trivial_omp.txt";
+    ofstream output(output_file);
+    for(string texto : textos){
+        for (int num_threads : p){
+            output << "N: " << texto << " Threads: " << num_threads << endl;
+            string T = get_text("../textos/banana_" + texto + ".txt",num_threads);
+            double count = 0;
+            for (int i = 0;  i < 10; i++) {
+                count += run_parallel(T,num_threads);
+            }
+            count/=10;
+            output << "Average time: " << count << " microseconds" << endl;
+        }
     }
-    count/=10;
-    cout << "Time: " << count << " microseconds" << endl;
-    
 
     return 0;
 }
