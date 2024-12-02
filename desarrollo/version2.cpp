@@ -2,8 +2,9 @@
 #include <unordered_map>
 #include <vector>
 #include <set>
-#include <mpi.h>
+#include <omp.h>
 #define NUM_STATES 9
+#define NUM_THREADS 4
 using namespace std;
 
 
@@ -19,7 +20,7 @@ vector<vector<int>> Tt = {
     {1, 0, 0, 0, 0}
 };
 string T = "parallel";
-int F = 8; // Final state
+set<int> F = {8};
 int q0 = 0;
 
 unordered_map <char, int> sigma = {
@@ -33,61 +34,42 @@ unordered_map <char, int> sigma = {
 
 
 int main(int argc, char **argv) {
-    int mpi_rank, mpi_size;
-    MPI_Status stat;
-    MPI_Init(&argc, &argv);
-    MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank); 
-    MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
-
-    int j = mpi_rank * (T.size() / mpi_size);
-    int end_position = (mpi_rank + 1) * (T.size() / mpi_size) - 1;
-    vector<int> L(NUM_STATES);
-    vector<int> R(NUM_STATES);
-    for (int k = 0; k < NUM_STATES; k++) {
-        L[k] = k;
-        R[k] = 0;
-    }
-
-    while (j <= end_position) {
-        for (int i = 0; i < NUM_STATES; i++) {
-            L[i] = Tt[L[i]][sigma[T[j]]];
-            if (L[i] == F) { // If the state is final
-                R[i] = R[i] + 1;
-            }
+    int n = T.size();
+    omp_set_num_threads(NUM_THREADS);
+    vector<vector<int>> L(NUM_THREADS,vector<int>(NUM_STATES));
+    vector<vector<int>> R(NUM_THREADS,vector<int>(NUM_STATES, 0));
+    #pragma omp parallel
+    {
+        int rank = omp_get_thread_num();
+        int size = omp_get_num_threads();
+        int j = rank * (n / size);
+        int end_position = (rank + 1) * (n/size) - 1;
+        for (int k = 0; k < NUM_STATES; k++) {
+            L[rank][k] = k;
         }
-        j = j + 1;
+        while (j <= end_position) {
+            for (int k = 0; k < NUM_STATES; k++) {
+                L[rank][k] = Tt[L[rank][k]][sigma[T[j]]];
+                if (F.find(L[rank][k]) != F.end()) {
+                    R[rank][k]++;
+                }
+            }
+            j++;
+        }
+        #pragma omp barrier
+        if(rank == 0){
+            int L_temp = q0;
+            int R_temp = 0;
+            for(int k = 0; k < size; k++){
+                R_temp += R[k][L_temp];
+                L_temp = L[k][L_temp];
+            }
+            R[0][q0] = R_temp;
+            L[0][q0] = L_temp;
+        }
     }
+    double end_time = omp_get_wtime();
+    cout << "Cantidad de veces que la cadena es aceptada: " << R[0][q0] << endl;
 
-    MPI_Barrier(MPI_COMM_WORLD);
-    int R_temp, L_temp;
-
-    if (mpi_rank == 0) {
-        MPI_Send(&R[q0], 1, MPI_INT, 1, 0, MPI_COMM_WORLD);
-        MPI_Send(&L[q0], 1, MPI_INT, 1, 1, MPI_COMM_WORLD);
-    }
-    else if (mpi_rank > 0 && mpi_rank < mpi_size - 1) {
-        MPI_Recv(&R_temp, 1, MPI_INT, mpi_rank - 1, 0, MPI_COMM_WORLD, &stat);
-        MPI_Recv(&L_temp, 1, MPI_INT, mpi_rank - 1, 1, MPI_COMM_WORLD, &stat);
-
-        R[L_temp] += R_temp;
-        MPI_Send(&R[L_temp], 1, MPI_INT, mpi_rank + 1, 0, MPI_COMM_WORLD);
-        MPI_Send(&L[L_temp], 1, MPI_INT, mpi_rank + 1, 1, MPI_COMM_WORLD);
-
-    }
-    else if (mpi_rank == mpi_size - 1) {
-        MPI_Recv(&R_temp, 1, MPI_INT, mpi_size - 2, 0, MPI_COMM_WORLD, &stat);
-        MPI_Recv(&L_temp, 1, MPI_INT, mpi_size - 2, 1, MPI_COMM_WORLD, &stat);
-        R[L_temp] += R_temp;
-        MPI_Send(&R[L_temp], 1, MPI_INT, 0, 2, MPI_COMM_WORLD);
-        MPI_Send(&L[L_temp], 1, MPI_INT, 0, 3, MPI_COMM_WORLD);
-    }
-
-    if (mpi_rank == 0) {
-        MPI_Recv(&R_temp, 1, MPI_INT, mpi_size - 1, 2, MPI_COMM_WORLD, &stat);
-        MPI_Recv(&L_temp, 1, MPI_INT, mpi_size - 1, 3, MPI_COMM_WORLD, &stat);
-        cout << "Cantidad de veces que la cadena es aceptada: " << R_temp << endl;
-    }
-
-    MPI_Finalize();
     return 0;
 }

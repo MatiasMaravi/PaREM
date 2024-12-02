@@ -1,5 +1,5 @@
 #include <iostream>
-#include "../automatas/banana_word.h"
+#include "../automatas/parallel_word.h"
 #include <omp.h>
 #include <fstream>
 
@@ -42,11 +42,12 @@ double run_parallel(const string& T, int NUM_THREADS){
             L[rank][k] = k;
         }
         while (j <= end_position) {
-            L[rank][q0] = Tt[L[rank][q0]][sigma[T[j]]];
-            if (F.find(L[rank][q0]) != F.end()) {
-                R[rank][q0]++;
+            for (int k = 0; k < NUM_STATES; k++) {
+                L[rank][k] = Tt[L[rank][k]][sigma[T[j]]];
+                if (F.find(L[rank][k]) != F.end()) {
+                    R[rank][k]++;
+                }
             }
-            
             j++;
         }
         #pragma omp barrier
@@ -67,15 +68,17 @@ double run_parallel(const string& T, int NUM_THREADS){
 }
 
 int main(int argc, char **argv) {
-    vector<string> textos = {"10k","100k","1M","2M"};
+    vector<string> textos = {"100k","500k","1M","2M"};
     vector<int> p = {2,4,8,16};
     string output_file = "results_trivial_omp.txt";
     ofstream output(output_file);
     for(string texto : textos){
         for (int num_threads : p){
             output << "N: " << texto << " Threads: " << num_threads << endl;
-            string T = get_text("../textos/banana_" + texto + ".txt",num_threads);
+            // string T = get_text("../textos/banana_" + texto + ".txt",num_threads);
+            string T = get_text("../textos/parallel_" + texto + ".txt",num_threads);
             double count = 0;
+            cout << "P: " << num_threads << endl;
             for (int i = 0;  i < 10; i++) {
                 count += run_parallel(T,num_threads);
             }

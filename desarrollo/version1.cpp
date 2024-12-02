@@ -2,9 +2,11 @@
 #include <unordered_map>
 #include <vector>
 #include <set>
-#include <mpi.h>
+#include <omp.h>
 #define NUM_STATES 9
+#define NUM_THREADS 4
 using namespace std;
+
 
 
 vector<vector<int>> Tt = {
@@ -18,7 +20,6 @@ vector<vector<int>> Tt = {
     {1, 0, 0, 0, 8},
     {1, 0, 0, 0, 0}
 };
-string T = "parallel";
 int F = 8; // Final state
 int q0 = 0;
 
@@ -30,37 +31,34 @@ unordered_map <char, int> sigma = {
     {'l', 4}
 };
 
-
+string T = "parallel";
 
 int main(int argc, char **argv) {
-    int mpi_rank, mpi_size;
-    MPI_Status stat;
-    MPI_Init(&argc, &argv);
-    MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank); 
-    MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
-
-    int j = mpi_rank * (T.size() / mpi_size);
-    int end_position = (mpi_rank + 1) * (T.size() / mpi_size) - 1;
-    vector<int> L(NUM_STATES);
-    vector<int> R(NUM_STATES);
-    for (int k = 0; k < NUM_STATES; k++) {
-        L[k] = k;
-        R[k] = 0;
-    }
-
-    while (j <= end_position) {
-        for (int i = 0; i < NUM_STATES; i++) {
-            L[i] = Tt[L[i]][sigma[T[j]]];
-            if (L[i] == F) { // If the state is final
-                R[i] = R[i] + 1;
-            }
+    int n = T.size();
+    omp_set_num_threads(NUM_THREADS);
+    vector<vector<int>> L(NUM_THREADS,vector<int>(NUM_STATES));
+    vector<vector<int>> R(NUM_THREADS,vector<int>(NUM_STATES, 0));
+    double start_time = omp_get_wtime();
+    #pragma omp parallel
+    {
+        int rank = omp_get_thread_num();
+        int size = omp_get_num_threads();
+        int j = rank * (n / size);
+        int end_position = (rank + 1) * (n/size) - 1;
+        for (int k = 0; k < NUM_STATES; k++) {
+            L[rank][k] = k;
         }
-        j = j + 1;
+        while (j <= end_position) {
+            for (int k = 0; k < NUM_STATES; k++) {
+                L[rank][k] = Tt[L[rank][k]][sigma[T[j]]];
+                if (F == L[rank][k]) {
+                    R[rank][k]++;
+                }
+            }
+            j++;
+        }
+        //Falta comunicar los resultados
     }
-
-    MPI_Barrier(MPI_COMM_WORLD);
-    //Falta comunicar los resultados de los procesos.
-
-    MPI_Finalize();
+    
     return 0;
 }

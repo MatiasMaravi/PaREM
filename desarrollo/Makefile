@@ -1,19 +1,26 @@
 # Variables
-GXX = mpic++
-P = 4
+GXX = g++
+CFLAGS = -Iheaders -fopenmp
 TARGETS = version1 version2 version3
 
-# Regla principal: compila todo
+# Regla principal (compila todo)
 all: $(TARGETS)
 
-# Regla genérica para compilar cada objetivo
+# Regla para compilar cualquier ejecutable
 %: %.cpp
-	$(GXX) -o run-$@.out $<
+	$(GXX) $(CFLAGS) -o $@ $<
 
-# Reglas para ejecutar cada versión
-run-%: %
-	mpirun -np $(P) $@.out
+# Regla para ejecutar trivial_reduction_omp
+run-version1: version1
+	./version1
+
+run-version2: version2
+	./version2
+
+run-version3: version3
+	./version3
+
 
 # Limpieza de archivos generados
 clean:
-	rm -f *.out
+	rm -f $(TARGETS)
