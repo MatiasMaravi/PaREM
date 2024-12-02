@@ -49,7 +49,7 @@ int64_t run_afd(const string& T){
 }
 
 int main(){
-    vector<string> textos = {"10k","100k","1M","2M"};
+    vector<string> textos = {"10k","100k","500k","1M"};
     string output_file = "results_sequential.txt";
     ofstream output(output_file);
     for(string texto : textos){
