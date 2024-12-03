@@ -1,5 +1,17 @@
 #include <iostream>
+#ifdef B_WORD
+#include "../automatas/b_word.h"
+string automata = "b_";
+#endif
+#ifdef BANANA_WORD
+#include "../automatas/banana_word.h"
+string automata = "banana_";
+#endif
+#ifdef PARALLEL_WORD
 #include "../automatas/parallel_word.h"
+string automata = "parallel_";
+#endif
+
 #include <omp.h>
 #include <fstream>
 
@@ -68,15 +80,16 @@ double run_parallel(const string& T, int NUM_THREADS){
 }
 
 int main(int argc, char **argv) {
+    // vector<string> textos = {"10k","100k","500k","1M"};
     vector<string> textos = {"10k","100k","500k","1M"};
-    vector<int> p = {2,4,8,16};
+    vector<int> p = {2,4,16,32};
     string output_file = "results_trivial_omp.txt";
     ofstream output(output_file);
     for(string texto : textos){
         for (int num_threads : p){
             output << "N: " << texto << " Threads: " << num_threads << endl;
             // string T = get_text("../textos/banana_" + texto + ".txt",num_threads);
-            string T = get_text("../textos/parallel_" + texto + ".txt",num_threads);
+            string T = get_text("../textos/" + automata + texto + ".txt",num_threads);
             double count = 0;
             cout << "P: " << num_threads << endl;
             for (int i = 0;  i < 10; i++) {
@@ -86,6 +99,7 @@ int main(int argc, char **argv) {
             output << "Average time: " << count << " microseconds" << endl;
         }
     }
+    output.close();
 
     return 0;
 }

@@ -1,7 +1,19 @@
 #include <iostream>
-#include "../automatas/banana_word.h"
 #include <fstream>
 #include <chrono>
+#ifdef B_WORD
+#include "../automatas/b_word.h"
+string automata = "b_";
+#endif
+#ifdef BANANA_WORD
+#include "../automatas/banana_word.h"
+string automata = "banana_";
+#endif
+#ifdef PARALLEL_WORD
+#include "../automatas/parallel_word.h"
+string automata = "parallel_";
+#endif
+
 using std::cout;
 using std::endl;
 using std::ifstream;
@@ -43,6 +55,7 @@ int64_t run_afd(const string& T){
         }
         j++;
     }
+    cout << "Cantidad de veces que se acepta la palabra: " << contador << endl;
     auto end = std::chrono::high_resolution_clock::now();
     auto time = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
     return time;
@@ -55,7 +68,7 @@ int main(){
     for(string texto : textos){
     
         output << "N: " << texto << endl;
-        string T = get_text("../textos/banana_" + texto + ".txt");
+        string T = get_text("../textos/" + automata + texto + ".txt");
         double count = 0;
         for (int i = 0;  i < 10; i++) {
             count += run_afd(T);
@@ -64,4 +77,5 @@ int main(){
         output << "Average time: " << count << " microseconds" << endl;
     
     }
+    output.close();
 }
