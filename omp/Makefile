@@ -1,5 +1,5 @@
 # Variables
-GXX = g++
+GXX = g++-13
 CFLAGS = -Iheaders -fopenmp
 TARGETS = trivial_reduction_omp
 

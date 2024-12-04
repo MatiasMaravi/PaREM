@@ -1,5 +1,5 @@
 # Variables
-GXX = g++
+GXX = g++-13
 CFLAGS = -Iheaders -fopenmp
 TARGET = main
 SRC = main.cpp

@@ -1,18 +1,19 @@
 # PaREM
 
+## Autómatas
+Nuestros autómatas están creados en la carpeta "automatas" y son los siguientes:
+- B_word
+- BANANA_word
+- PARALLEL_word
+
 ## Optimización
 Para poder calcular de manera automática los tiempo es necesario correr el siguiente comando (no funciona en MacOS):
 ```zsh
-cd omp/
-make run-trivial
+sh run.sh
 ```
-Por defecto las pruebas se hacen con un autómata que acepta la cadena "parallel" y los textos de prueba están en la carpeta textos.
-Si se desea utilizar otro autómata es necesario cambiarlo en la línea 2 del archivo trivial_reduction_omp.cpp
-Para esto es necesario haber definido un autómata en la carpeta automatas y haberlo incluido en el archivo cpp.
-```cpp
-#include "../automatas/parallel_word.h"
-```
-Y en la línea 79 del mismo archivo. Esto es necesario porque tiene que leer los textos con los que se va a trabajar.
-```cpp
-string T = get_text("../textos/parallel_" + texto + ".txt",num_threads);
-```
+Se presentará un pequeño menú con las opciones de ejecución, para poder correr el programa es necesario.
+- Opción 1. Ejecutar el programa con el autómata "B_word".
+- Opción 2. Ejecutar el programa con el autómata "BANANA_word".
+- Opción 3. Ejecutar el programa con el autómata "PARALLEL_word".
+
+Esto ejecutará automáticamente el algoritmo de manera secuencial y paralela con distintos tamaños de cadena y distintos números de hilos. Los gráficos de tiempo serán generados automáticamente en la carpeta "graficos_<nombre del autómata>"
