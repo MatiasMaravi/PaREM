@@ -41,33 +41,47 @@ os.makedirs(output_dir, exist_ok=True)
 tiempos_secuenciales = leer_tiempos_secuenciales("sequential/results_sequential.txt")
 tiempos_paralelos = leer_tiempos_paralelos("omp/results_trivial_omp.txt")
 
-# Crear un gráfico único con todas las líneas
-plt.figure(figsize=(10, 8))
-
+# Crear gráficos individuales para cada valor de N
 for n in tiempos_paralelos["N"].unique():
     subset = tiempos_paralelos[tiempos_paralelos["N"] == n]
     secuencial_time = tiempos_secuenciales.get(n, None)
     
-    # Graficar tiempo secuencial como línea horizontal
-    if secuencial_time is not None:
-        plt.hlines(y=secuencial_time, xmin=subset["Threads"].min(), xmax=subset["Threads"].max(),
-                   colors='gray', linestyles='dashed', label=f"Secuencial ({n})")
-    
-    # Graficar tiempos paralelos
-    plt.plot(subset["Threads"], subset["Time"], marker='o', label=f"Paralelo ({n})")
+    plt.figure(figsize=(10, 7))
 
-# Configuración del gráfico
-plt.xscale("log", base=2)  # Eje X en escala logarítmica
-plt.xlabel("Cantidad de Threads", fontsize=12)
-plt.ylabel("Tiempo Promedio (microseconds)", fontsize=12)
-plt.title("Comparación de Tiempos Secuenciales y Paralelos", fontsize=14)
-plt.legend()
-plt.grid(True, which="both", linestyle="--", linewidth=0.5)
+    for n in tiempos_paralelos["N"].unique():
+        subset = tiempos_paralelos[tiempos_paralelos["N"] == n]
+        secuencial_time = tiempos_secuenciales.get(n, None)
+        if(n == "10k"):
+            n_valor = 10000
+        elif(n == "100k"):
+            n_valor = 100000
+        elif(n == "500k"):
+            n_valor = 500000
+        elif(n == "1M"):
+            n_valor = 1000000
+        
+        if secuencial_time is not None:
+            # Calcular y graficar speedup real
+            speedup_real = secuencial_time / subset["Time"]
+            plt.plot(subset["Threads"], speedup_real, marker='o', label=f"Speedup Real (N={n})")
+            
+            # Calcular y graficar speedup teórico
+            speedup_teorico = [n_valor / ((n_valor / p) * 7) for p in subset["Threads"]]
+            plt.plot(subset["Threads"], speedup_teorico, linestyle='--', marker='x', label=f"Speedup Teórico (N={n})")
 
-# Guardar el gráfico
-output_path = os.path.join(output_dir, "grafico_comparativo.png")
-plt.tight_layout()
-plt.savefig(output_path)
-plt.close()
+    # Configuración del gráfico
+    plt.xscale("log", base=2)
+    plt.xlabel("Cantidad de Threads", fontsize=12)
+    plt.ylabel("Speedup", fontsize=12)
+    plt.title("Speedup: Real vs Teórico", fontsize=14)
+    plt.legend(title="Valores de N", fontsize=10)
+    plt.grid(True, which="both", linestyle="--", linewidth=0.5)
 
-print(f"Gráfico generado y guardado en '{output_path}'.")
+    # Guardar el gráfico
+    speedup_path = os.path.join(output_dir, "speedup_grafico.png")
+    plt.tight_layout()
+    plt.savefig(speedup_path)
+    plt.close()
+
+
+print(f"Gráficos generados y guardados en la carpeta '{output_dir}'.")
