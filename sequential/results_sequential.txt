@@ -1,8 +1,8 @@
 N: 10k
-Average time: 1530.2 microseconds
+Average time: 1455.7 microseconds
 N: 100k
-Average time: 14232.3 microseconds
+Average time: 14542.9 microseconds
 N: 500k
-Average time: 63560 microseconds
+Average time: 63303.9 microseconds
 N: 1M
-Average time: 121125 microseconds
+Average time: 121698 microseconds

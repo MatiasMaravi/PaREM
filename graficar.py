@@ -79,7 +79,7 @@ plt.legend(title="Valores de N", fontsize=10)
 plt.grid(True, which="both", linestyle="--", linewidth=0.5)
 
 # Guardar el gráfico
-output_path = os.path.join(output_dir, "speedup_eficiencia_grafico.png")
+output_path = os.path.join(output_dir, "speedup_eficiencia_parallel_word.png")
 plt.tight_layout()
 plt.savefig(output_path)
 plt.close()
