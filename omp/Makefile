@@ -1,5 +1,13 @@
 # Variables
-GXX = g++-13
+# Detectar sistema operativo
+UNAME := $(shell uname)
+
+ifeq ($(UNAME), Darwin)
+    GXX = g++-14
+else
+    GXX = g++
+endif
+
 CFLAGS = -Iheaders -fopenmp
 TARGETS = trivial_reduction_omp
 

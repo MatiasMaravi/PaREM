@@ -7,7 +7,7 @@ Nuestros autómatas están creados en la carpeta "automatas" y son los siguiente
 - PARALLEL_word
 
 ## Optimización
-Para poder calcular de manera automática los tiempo es necesario correr el siguiente comando (no funciona en MacOS):
+Para poder calcular de manera automática los tiempo es necesario correr el siguiente comando:
 ```zsh
 sh run.sh
 ```
